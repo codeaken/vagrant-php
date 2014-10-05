@@ -1,0 +1,67 @@
+- name: Install MariaDB
+  apt:
+    pkg=mariadb-server-10.0
+
+- name: Enable MariaDB service
+  service:
+    name=mysql
+    state=started
+    enabled=yes
+
+- name: Install MySQL Python package
+  apt:
+    pkg=python-mysqldb
+
+- name: Remove anonymous users
+  mysql_user:
+    name= host="{{ item }}"
+    state=absent
+  with_items:
+    - localhost
+    - $ansible_hostname
+    - $inventory_hostname
+
+- name: Remove remote root
+  mysql_user:
+    name=root
+    host="{{ item }}"
+    state=absent
+  with_items:
+    - $ansible_hostname
+
+- name: Remove test database
+  mysql_db:
+    name=test
+    state=absent
+
+- name: Set root password
+  mysql_user:
+    name=root
+    password="{{ mariadb_password }}"
+    host="{{ item }}"
+    state=present
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: Saving my.cnf for root and vagrant user
+  template:
+    src=my_root.cnf.j2
+    dest="{{ item.dest }}"
+    owner="{{ item.owner }}"
+    group="{{ item.group }}"
+    mode="{{ item.mode }}"
+  with_items:
+    - {
+        dest: /root/.my.cnf,
+        owner: root,
+        group: root,
+        mode: "0400"
+      }
+    - {
+        dest: /home/vagrant/.my.cnf,
+        owner: vagrant,
+        group: vagrant,
+        mode: "0400"
+      }

@@ -1,0 +1,84 @@
+- name: Install PHP
+  apt:
+    pkg="{{ item }}"
+  with_items:
+    - php5-fpm
+    - php5-cli
+    - php5-curl
+    - php5-mcrypt
+    - php5-mysqlnd
+    - php5-gd
+    - php5-imagick
+    - php5-redis
+    - php5-memcache
+    - php5-memcached
+  notify:
+    Restart PHP
+
+- name: Remove default www FPM pool
+  file:
+    path=/etc/php5/fpm/pool.d/www.conf
+    state=absent
+  notify:
+    Restart PHP
+
+- name: Activate PHP MCrypt
+  file:
+    src="{{ item.src }}"
+    dest="{{ item.dest }}"
+    state=link
+  with_items:
+    - { src: "../../mods-available/mcrypt.ini", dest: "/etc/php5/fpm/conf.d/20-mcrypt.ini" }
+    - { src: "../../mods-available/mcrypt.ini", dest: "/etc/php5/cli/conf.d/20-mcrypt.ini" }
+  notify:
+    Restart PHP
+
+- name: Add additional configuration
+  template:
+    src=upload.ini.j2
+    dest=/etc/php5/fpm/conf.d/30-upload.ini
+    owner=root
+    group=root
+    mode=0644
+  notify:
+    Restart PHP
+
+- name: Check if composer is installed
+  shell: "[ -f /usr/bin/composer.phar ] && echo installed || echo missing"
+  register: composer_installed
+  changed_when: composer_installed.stdout == "missing"
+
+- name: Install composer
+  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin
+  when: composer_installed.stdout == "missing"
+
+- name: Link composer to composer.phar
+  file:
+    src=/usr/bin/composer.phar
+    dest=/usr/bin/composer
+    owner=root
+    group=root
+    state=link
+
+- name: Create PHP group
+  group:
+    name=php
+    gid=1101
+
+- name: Create PHP user
+  user:
+    name=php
+    uid=1101
+    group=php
+    createhome=no
+    shell=/bin/false
+
+- name: Create a FPM pool
+  copy:
+    src=9000-default.conf
+    dest=/etc/php5/fpm/pool.d/9000-default.conf
+    owner=root
+    group=root
+    mode=0644
+  notify:
+    Restart PHP

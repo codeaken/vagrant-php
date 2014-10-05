@@ -1,0 +1,9 @@
+- name: Install Beanstalkd
+  apt:
+    pkg=beanstalkd
+
+- name: Enable Beanstalkd service
+  service:
+    name=beanstalkd
+    state=started
+    enabled=yes

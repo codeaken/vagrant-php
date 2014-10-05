@@ -1,0 +1,40 @@
+- name: Install HHVM
+  apt:
+    pkg=hhvm
+
+- name: Change user to run as
+  lineinfile:
+    dest=/etc/default/hhvm
+    regexp="#?RUN_AS_USER"
+    line='RUN_AS_USER="php"'
+
+- name: Change group to run as
+  lineinfile:
+    dest=/etc/default/hhvm
+    regexp="#?RUN_AS_GROUP"
+    line='RUN_AS_GROUP="php"'
+
+- name: Change ownership of hhvm cache
+  file:
+    path="{{ item }}"
+    owner=php
+    group=php
+  with_items:
+    - /var/run/hhvm/
+    - /var/run/hhvm/hhvm.hhbc
+
+- name: Copy server config
+  copy:
+    src=server.ini
+    dest=/etc/hhvm/server.ini
+    owner=root
+    group=root
+    mode=0644
+  notify:
+    Restart HHVM
+
+- name: Enable HHVM service
+  service:
+    name=hhvm
+    state=started
+    enabled=yes

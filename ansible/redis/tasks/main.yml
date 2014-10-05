@@ -1,0 +1,9 @@
+- name: Install Redis
+  apt:
+    pkg=redis-server
+
+- name: Enable Redis service
+  service:
+    name=redis-server
+    state=started
+    enabled=yes

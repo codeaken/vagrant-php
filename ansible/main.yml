@@ -1,0 +1,16 @@
+---
+- hosts: all
+  vars_files:
+    - vars/mariadb.yml
+    - vars/php.yml
+  roles:
+    - apt
+    - common
+    - mariadb
+    - redis
+    - memcached
+    - beanstalkd
+    - php
+    - hhvm
+    - apache
+    - mail

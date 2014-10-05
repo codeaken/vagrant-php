@@ -1,0 +1,9 @@
+- name: Install Git
+  apt:
+    pkg=git
+
+- name: Set internal hostnames
+  lineinfile:
+    dest=/etc/hosts
+    regexp="127.0.0.1"
+    line='127.0.0.1 vagrant-php vagrant-php.dev php.vagrant-php.dev hhvm.vagrant-php.dev'

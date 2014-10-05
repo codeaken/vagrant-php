@@ -1,0 +1,43 @@
+Vagrant.configure("2") do |config|
+    # Based on Ubuntu 14.04 (Trusty Tahr)
+    config.vm.box = "ubuntu/trusty64"
+
+    # Networking
+    config.vm.hostname = "vagrant-php"
+    config.vm.network "private_network", type: "dhcp"
+
+    # Synced folders
+    config.vm.synced_folder ".", "/vagrant"
+
+    # Example of NFS mount
+    #config.vm.synced_folder "<Local Folder>", "/var/www", type: "nfs"
+
+    # Example of Virtual Box shared folder mount (slow!)
+    #config.vm.synced_folder "<Local Folder>", "/var/www", owner: 1101, group: 1101
+
+    # Plugin: hostmanager
+    # (vagrant plugin install vagrant-hostmanager)
+    config.hostmanager.enabled = true
+    config.hostmanager.manage_host = true
+    config.hostmanager.ignore_private_ip = false
+    config.hostmanager.include_offline = false
+    config.hostmanager.aliases = %w(vagrant-php.dev php.vagrant-php.dev hhvm.vagrant-php.dev mailcatcher.vagrant-php.dev)
+    config.hostmanager.ip_resolver = proc do |machine|
+        result = ""
+        machine.communicate.execute("ifconfig eth1") do |type, data|
+            result << data if type == :stdout
+        end
+        (ip = /inet addr:(\d+\.\d+\.\d+\.\d+)/.match(result)) && ip[1]
+    end
+
+    # Provider: VirtualBox
+    config.vm.provider "virtualbox" do |virtualbox|
+        virtualbox.name = "vagrant-php"
+    end
+
+    # Provisioner: Ansible
+    config.vm.provision "ansible" do |ansible|
+        ansible.playbook = "ansible/main.yml"
+        ansible.sudo = true
+    end
+end

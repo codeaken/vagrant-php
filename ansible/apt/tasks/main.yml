@@ -1,0 +1,20 @@
+- name: Add MariaDB, Percona and HHVM apt repository keys
+  apt_key:
+    url="{{ item }}"
+  with_items:
+    - http://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0xcbcb082a1bb943db
+    - http://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1c4cbdcdcd2efd2a
+    - http://dl.hhvm.com/conf/hhvm.gpg.key
+
+- name: Add MariaDB, Percona and HHVM repositories
+  apt_repository:
+    repo="{{ item }}"
+  with_items:
+    - deb http://ftp.ddg.lth.se/mariadb/repo/10.0/ubuntu trusty main
+    - deb http://repo.percona.com/apt trusty main
+    - deb http://dl.hhvm.com/ubuntu trusty main
+    - deb-src http://repo.percona.com/apt trusty main
+
+- name: Update APT
+  apt:
+    update_cache=yes

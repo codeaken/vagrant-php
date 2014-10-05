@@ -1,0 +1,67 @@
+- name: Install dependencies needed to build MailCatcher
+  apt:
+    pkg="{{item}}"
+  with_items:
+    - ruby-dev
+    - libsqlite3-dev
+    - g++
+
+- name: Install MailCatcher
+  gem:
+    name=mailcatcher
+    user_install=no
+
+- name: Create MailCatcher group
+  group:
+    name=mailcatcher
+
+- name: Create MailCatcher user
+  user:
+    name=mailcatcher
+    group=php
+    createhome=no
+    shell=/bin/false
+
+- name: Install init script for MailCatcher
+  copy:
+    src=mailcatcher
+    dest=/etc/init.d/mailcatcher
+    owner=root
+    group=root
+    mode=0755
+
+- name: Enable MailCatcher service
+  service:
+    name=mailcatcher
+    state=started
+    enabled=yes
+
+- name: Install postfix
+  apt:
+    pkg=postfix
+
+- name: Forward all mails to MailCatcher
+  lineinfile:
+    dest=/etc/postfix/main.cf
+    regexp="relayhost =.*"
+    line="relayhost = 127.0.0.1:1025"
+  notify:
+    Restart postfix
+
+- name: Add MailCatcher site
+  copy:
+    src=mailcatcher.conf
+    dest=/etc/apache2/sites-available/003-mailcatcher.conf
+    owner=root
+    group=root
+    mode=0644
+  notify:
+    Restart Apache
+
+- name: Enable MailCatcher site
+  file:
+    src=../sites-available/003-mailcatcher.conf
+    dest=/etc/apache2/sites-enabled/003-mailcatcher.conf
+    state=link
+  notify:
+    Restart Apache
