@@ -43,19 +43,14 @@
   notify:
     Restart PHP
 
-- name: Check if composer is installed
-  shell: "[ -f /usr/bin/composer.phar ] && echo installed || echo missing"
-  register: composer_installed
-  changed_when: composer_installed.stdout == "missing"
-
 - name: Download composer
   get_url:
     url=https://getcomposer.org/composer.phar
     dest=/usr/bin/composer.phar
+    force=yes
     owner=root
     group=root
     mode=0755
-  when: composer_installed.stdout == "missing"
 
 - name: Link composer to composer.phar
   file:
@@ -65,19 +60,14 @@
     group=root
     state=link
 
-- name: Check if phpunit is installed
-  shell: "[ -f /usr/bin/phpunit.phar ] && echo installed || echo missing"
-  register: phpunit_installed
-  changed_when: phpunit_installed.stdout == "missing"
-
 - name: Download phpunit
   get_url:
     url=https://phar.phpunit.de/phpunit.phar
     dest=/usr/bin/phpunit.phar
+    force=yes
     owner=root
     group=root
     mode=0755
-  when: phpunit_installed.stdout == "missing"
 
 - name: Link phpunit to phpunit.phar
   file:
