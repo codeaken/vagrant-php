@@ -12,6 +12,7 @@
     - php5-redis
     - php5-memcache
     - php5-memcached
+    - php5-xdebug
   notify:
     Restart PHP
 
