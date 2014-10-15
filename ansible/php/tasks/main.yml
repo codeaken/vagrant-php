@@ -60,6 +60,28 @@
     group=root
     state=link
 
+- name: Check if phpunit is installed
+  shell: "[ -f /usr/bin/phpunit.phar ] && echo installed || echo missing"
+  register: phpunit_installed
+  changed_when: phpunit_installed.stdout == "missing"
+
+- name: Download phpunit
+  get_url:
+    url=https://phar.phpunit.de/phpunit.phar
+    dest=/usr/bin/phpunit.phar
+    owner=root
+    group=root
+    mode=0755
+  when: phpunit_installed.stdout == "missing"
+
+- name: Link phpunit to phpunit.phar
+  file:
+    src=/usr/bin/phpunit.phar
+    dest=/usr/bin/phpunit
+    owner=root
+    group=root
+    state=link
+
 - name: Create PHP group
   group:
     name=php
