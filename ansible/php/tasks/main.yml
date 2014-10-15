@@ -48,8 +48,13 @@
   register: composer_installed
   changed_when: composer_installed.stdout == "missing"
 
-- name: Install composer
-  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin
+- name: Download composer
+  get_url:
+    url=https://getcomposer.org/composer.phar
+    dest=/usr/bin/composer.phar
+    owner=root
+    group=root
+    mode=0755
   when: composer_installed.stdout == "missing"
 
 - name: Link composer to composer.phar
