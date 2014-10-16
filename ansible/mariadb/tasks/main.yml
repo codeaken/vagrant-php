@@ -12,37 +12,29 @@
   apt:
     pkg=python-mysqldb
 
-- name: Remove anonymous users
-  mysql_user:
-    name= host="{{ item }}"
-    state=absent
-  with_items:
-    - localhost
-    - $ansible_hostname
-    - $inventory_hostname
-
-- name: Remove remote root
-  mysql_user:
-    name=root
-    host="{{ item }}"
-    state=absent
-  with_items:
-    - $ansible_hostname
-
 - name: Remove test database
   mysql_db:
     name=test
     state=absent
+
+- name: Remove anonymous users
+  mysql_user:
+    name=
+    host="{{ item }}"
+    state=absent
+  with_items:
+    - localhost
+    - "{{ ansible_hostname }}"
 
 - name: Set root password
   mysql_user:
     name=root
     password="{{ mariadb_password }}"
     host="{{ item }}"
+    priv=*.*:ALL,GRANT
     state=present
   with_items:
-    - 127.0.0.1
-    - ::1
+    - "%"
     - localhost
 
 - name: Saving my.cnf for root and vagrant user
@@ -66,10 +58,31 @@
         mode: "0400"
       }
 
+- name: Remove the other root users since we have a generic one now
+  mysql_user:
+    name=root
+    host="{{ item }}"
+    state=absent
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+    - "{{ ansible_hostname }}"
+
 - name: Set default character set to UTF-8
   copy:
     src=character_set.cnf
     dest=/etc/mysql/conf.d/character_set.cnf
+    owner=root
+    group=root
+    mode=0644
+  notify:
+    Restart MariaDB
+
+- name: Listen on all IPs so we can access externally
+  copy:
+    src=listen.cnf
+    dest=/etc/mysql/conf.d/listen.cnf
     owner=root
     group=root
     mode=0644
