@@ -2,6 +2,10 @@
   apt:
     pkg=mariadb-server-10.0
 
+- name: Install Percona toolkit
+  apt:
+    pkg=percona-toolkit
+
 - name: Enable MariaDB service
   service:
     name=mysql
