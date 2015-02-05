@@ -13,6 +13,7 @@
     - php5-memcache
     - php5-memcached
     - php5-xdebug
+    - php5-intl
   notify:
     Restart PHP
 
