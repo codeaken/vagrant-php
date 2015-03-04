@@ -1,0 +1,21 @@
+- name: Install NodeJS
+  apt:
+    pkg=nodejs
+
+- name: Install NodeJS symlink
+  apt:
+    pkg=nodejs-legacy
+
+- name: Install NPM (Node Package Manager)
+  apt:
+    pkg=npm
+
+- name: Install Grunt
+  npm:
+    name=grunt-cli
+    global=yes
+
+- name: Install Bower
+  npm:
+    name=bower
+    global=yes
