@@ -89,7 +89,7 @@
     name=php
     uid=1101
     group=php
-    createhome=no
+    createhome=yes
     shell=/bin/false
 
 - name: Create a FPM pool
