@@ -34,6 +34,9 @@ Vagrant.configure("2") do |config|
     config.vm.provider "virtualbox" do |virtualbox|
         virtualbox.name = "vagrant-php"
         virtualbox.memory = 1024
+
+        # Make DNS resolving work
+        virtualbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
     end
 
     # Provisioner: Ansible
